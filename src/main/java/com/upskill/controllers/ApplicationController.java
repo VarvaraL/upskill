@@ -23,20 +23,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-@RequestMapping("")
-@RestController
+@RestController("/api/users")
 @Api(tags = "Application Rest Controller")
 @Tag(name = "Application Rest Controller", description = "API for doing some CRUD with Application")
 public class ApplicationController {
     private final ApplicationService applicationService;
+    private final UserService userService;
 
-    public ApplicationController(ApplicationService applicationService) {
+    public ApplicationController(ApplicationService applicationService, UserService userService) {
         this.applicationService = applicationService;
+        this.userService = userService;
     }
 
-    @GetMapping("/api/applications")
+    @GetMapping("/{userid}/applications")
     @ApiOperation(
             value = "getAll",
             notes = "return List<ApplicationDto>",
@@ -48,13 +50,14 @@ public class ApplicationController {
             @ApiResponse(code = 403, message = "Операция запрещена"),
             @ApiResponse(code = 401, message = "Нет доступа к операции"),
             @ApiResponse(code = 500, message = "Ошибка сервера")})
-    public ResponseEntity<List<ApplicationDto>> getAllApplications (){
-        return applicationService.getAll() != null &&  ! applicationService.getAll().isEmpty()
-                ? new ResponseEntity<>(applicationService.getAll(), HttpStatus.OK)
+    public ResponseEntity<Optional<List<ApplicationDto>>> getAllApplications (
+            @PathVariable("userid") Long userid){
+        return applicationService.getAll(userid).isPresent()
+                ? ResponseEntity.ok(applicationService.getAll(userid))
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/api/applications/{applicationid}")
+    @GetMapping("/{userid}/applications/{applicationid}")
     @ApiOperation(
             value = "getById",
             notes = "return Application",
@@ -65,15 +68,17 @@ public class ApplicationController {
             @ApiResponse(code = 403, message = "Операция запрещена"),
             @ApiResponse(code = 401, message = "Нет доступа к операции"),
             @ApiResponse(code = 500, message = "Ошибка сервера")})
-    public ResponseEntity<ApplicationDto> getById(
+    public ResponseEntity<Optional<ApplicationDto>> getById(
             @ApiParam(name = "applicationid", value = "id для получения Application", required = true)
+            @PathVariable("userid") Long userid,
             @PathVariable("applicationid") Long id) {
-        return applicationService.getById(id) != null
-                ? new ResponseEntity<>(applicationService.getById(id), HttpStatus.OK)
+        return applicationService.getById(id, userid).isPresent()
+                ? ResponseEntity.ok(applicationService.getById(id, userid))
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/api/applications")
+
+    @PostMapping
     @ApiOperation(
             value = "create",
             notes = "Create Application")
@@ -85,16 +90,15 @@ public class ApplicationController {
             @ApiResponse(code = 500, message = "Ошибка сервера")})
     public ResponseEntity<ApplicationDto> create(
             @ApiParam(name = "ApplicationDto", value = "ApplicationDto for create Application", required = true)
+            @PathVariable("userid") Long userid,
             @RequestBody ApplicationDto applicationDto) {
-        applicationService.create(applicationDto);
-        Set<BookDto> booksInApplication = applicationDto.getBooksInApplication();
-        for (BookDto bookDto: booksInApplication) {
-            bookDto.setBookIsBooked(true);
-        }
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        applicationService.create(applicationDto, userid);
+//        applicationDto.setUser(userService.getById(userid).get());
+
+        return ResponseEntity.ok(applicationDto);
     }
 
-    @PutMapping("/api/applications")
+    @PutMapping("/{userid}/applications")
     @ApiOperation(
             value = "update",
             notes = "Update Application")
@@ -106,12 +110,13 @@ public class ApplicationController {
             @ApiResponse(code = 500, message = "Ошибка сервера")})
     public ResponseEntity<ApplicationDto> update(
             @ApiParam(name = "ApplicationDto", value = "ApplicationDto for update Application", required = true)
+            @PathVariable("userid") Long userid,
             @RequestBody ApplicationDto applicationDto) {
-        applicationService.update(applicationDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        applicationService.update(applicationDto, userid);
+        return ResponseEntity.ok(applicationDto);
     }
 
-    @DeleteMapping("/api/applications/{applicationid}")
+    @DeleteMapping("/{userid}/{applicationid}")
     @ApiOperation(
             value = "deleteById",
             notes = "Deleting a Application by ID")
@@ -123,13 +128,9 @@ public class ApplicationController {
             @ApiResponse(code = 500, message = "Ошибка сервера")})
     public ResponseEntity<ApplicationDto> deleteById(
             @ApiParam(name = "applicationid", value = "id удаляемого Application", required = true)
-            @PathVariable("applicationid") Long id){
-
-        Set<BookDto> booksInApplication = applicationService.getById(id).getBooksInApplication();
-        for (BookDto bookDto: booksInApplication) {
-            bookDto.setBookIsBooked(false);
-        }
-        applicationService.deleteById(id);
+            @PathVariable("userid") Long userid,
+            @PathVariable("applicationid") Long applicationId){
+        applicationService.deleteById(userid, applicationId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

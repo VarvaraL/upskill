@@ -20,7 +20,7 @@ public class ApplicationDto {
 
     private LocalDate dateOverBooking;
 
-    private User user;
+    private UserGetDto user;
 
     private Set<BookDto> booksInApplication = new HashSet<>();
 

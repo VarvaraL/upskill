@@ -1,5 +1,6 @@
 package com.upskill.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,7 @@ public class UserPostDto {
     @JsonProperty("password")
     private String password;
 
-    @JsonProperty("usersApplications")
+//    @JsonIgnore
     private Set<ApplicationDto> usersApplications;
 
     public UserPostDto(Long id, String username, String firstName, String lastName, String password) {

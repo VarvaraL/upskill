@@ -1,5 +1,6 @@
 package com.upskill.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ import java.util.Set;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "Application")
+@Table(name = "Application", schema = "public")
 public class Application {
 
     @Id
@@ -24,10 +25,13 @@ public class Application {
     @Column(name = "date_over_booking")
     private LocalDate dateOverBooking;
 
+//    @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne
+    @JsonIgnore
     private User user;
 
-    @OneToMany(fetch=FetchType.EAGER)
+
+    @OneToMany(mappedBy = "usersApplication")
     private Set<Book> booksInApplication;
 
 }

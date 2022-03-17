@@ -1,4 +1,5 @@
 package com.upskill.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @ToString
 @EqualsAndHashCode
 @Entity
-@Table(name = "book")
+@Table(name = "book", schema = "public")
 public class Book {
 
     @Id
@@ -26,7 +27,9 @@ public class Book {
     @Column(name = "book_is_booked")
     private boolean bookIsBooked;
 
-    @OneToOne
+    @ManyToOne
+//    @JoinColumn(name = "application_id")
+//    @JsonIgnore
     private Application usersApplication;
 
 }

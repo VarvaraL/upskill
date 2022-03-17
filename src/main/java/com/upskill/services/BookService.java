@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -16,15 +17,13 @@ public class BookService {
     private final BookRepository bookRepository;
 
     @Transactional
-    public List<BookDto> getAll() {
-        System.out.println("сервис книги " + bookRepository.getAll());
-        return bookRepository.getAll();
+    public Optional<List<BookDto>> getAll() {
+        return Optional.of(bookRepository.getAll());
     }
 
     @Transactional
-    public BookDto getById(Long id) {
-        System.out.println("сервис книги " + getById(id));
-        return bookRepository.getById(id);
+    public Optional<BookDto> getById(Long id) {
+        return Optional.of(bookRepository.getById(id));
     }
 
     @Transactional

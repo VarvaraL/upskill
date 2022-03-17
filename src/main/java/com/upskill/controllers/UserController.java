@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("")
 @RestController
@@ -46,9 +47,9 @@ public class UserController {
             @ApiResponse(code = 401, message = "Нет доступа к операции"),
             @ApiResponse(code = 500, message = "Ошибка сервера")})
     @GetMapping("/api/users")
-    public ResponseEntity<List<UserGetDto>> getAllUsers (){
-        return userService.getAll() != null &&  ! userService.getAll().isEmpty()
-                ? new ResponseEntity<>(userService.getAll(), HttpStatus.OK)
+    public ResponseEntity<Optional<List<UserGetDto>>> getAllUsers (){
+        return userService.getAll().isPresent()
+                ? ResponseEntity.ok(userService.getAll())
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -66,8 +67,8 @@ public class UserController {
     public ResponseEntity<UserGetDto> getById(
             @ApiParam(name = "userid", value = "id для получения User", required = true)
             @PathVariable("userid") Long id) {
-        return userService.getById(id) != null
-                ? new ResponseEntity<>(userService.getById(id), HttpStatus.OK)
+        return userService.getById(id).isPresent()
+                ? ResponseEntity.ok(userService.getById(id).get())
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -85,7 +86,7 @@ public class UserController {
             @ApiParam(name = "UserPostDto", value = "UserPostDto for create User", required = true)
             @RequestBody UserPostDto userDto) {
         userService.create(userDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.ok(userDto);
     }
 
     @ApiOperation(
@@ -102,7 +103,7 @@ public class UserController {
             @ApiParam(name = "UserPostDto", value = "UserPostDto for update User", required = true)
             @RequestBody UserPostDto userDto) {
         userService.update(userDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(userDto);
     }
 
     @DeleteMapping("/api/users/{userid}")

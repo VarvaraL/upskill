@@ -45,8 +45,8 @@ public class BookController {
             @ApiResponse(code = 401, message = "Нет доступа к операции"),
             @ApiResponse(code = 500, message = "Ошибка сервера")})
     public ResponseEntity<List<BookDto>> getAllBooks (){
-        return bookService.getAll() != null &&  ! bookService.getAll().isEmpty()
-                ? new ResponseEntity<>(bookService.getAll(), HttpStatus.OK)
+        return bookService.getAll().isPresent()
+                ? ResponseEntity.of(bookService.getAll())
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -64,8 +64,8 @@ public class BookController {
     public ResponseEntity<BookDto> getById(
             @ApiParam(name = "id", value = "id для получения Book", required = true)
             @PathVariable("id") Long id) {
-        return bookService.getById(id) != null
-                ? new ResponseEntity<>(bookService.getById(id), HttpStatus.OK)
+        return bookService.getById(id).isPresent()
+                ? ResponseEntity.ok(bookService.getById(id).get())
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -83,7 +83,7 @@ public class BookController {
             @ApiParam(name = "BookDto", value = "BookDto for create Task", required = true)
             @RequestBody BookDto bookDto) {
         bookService.create(bookDto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.ok(bookDto);
     }
 
     @ApiOperation(
@@ -100,7 +100,7 @@ public class BookController {
             @ApiParam(name = "BookDto", value = "BookDto for update Book", required = true)
             @RequestBody BookDto bookDto) {
         bookService.update(bookDto);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(bookDto);
     }
 
 
